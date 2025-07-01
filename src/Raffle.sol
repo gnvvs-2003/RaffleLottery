@@ -18,8 +18,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
     uint32 private immutable i_callbackGasLimit;
     bytes32 private immutable i_keyHash;
 
-    address[] private s_players;
+    address payable[] private s_players;
     uint256 private s_lastTimeStamp;
+    address private s_recentWinner;
 
     uint16 private constant REQUEST_CONFIRMATIONS = 4;
     uint32 private constant NUM_WORDS = 1;
@@ -87,10 +88,21 @@ contract Raffle is VRFConsumerBaseV2Plus {
     // custom errors
     error Raffle__sendMoneyToEnterRaffle();
     error Raffle__notEnoughTimePassed();
+    error Raffle__failedPaymentToWinnerError();
 
     // interface functions
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] calldata randomWords
-    ) internal override {}
+    ) internal override {
+        uint256 indexOfWinner = randomWords[0]%s_players.length;
+        address payable recentWinner = s_players[indexOfWinner];
+        s_recentWinner = recentWinner;
+        // pay the Raffle amount to winner
+        (bool success,) = recentWinner.call{value:address(this).balance}("");
+        if(!success){
+            revert Raffle__failedPaymentToWinnerError();
+        }
+
+    }
 }
