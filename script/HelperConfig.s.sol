@@ -17,11 +17,22 @@ contract HelperConfig is Script, CodeConstants {
 
     NetworkConfig public localNetworkConfig;
 
+    constructor() {
+        networkConfig[LOCAL_CHAIN_ID] = getSepoliaEthConfig();
+    }
+
     // network configs for chains mapping chainId to network Config
     mapping(uint256 chainId => NetworkConfig) public networkConfig;
 
     /**
      * @dev : getting config by chainId
+     */
+    function getConfig() public returns (NetworkConfig memory) {
+        return getConfigByChainId(block.chainid);
+    }
+
+    /**
+     * @dev : local chain config
      */
     function getConfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
         // if network config has chain id configs
@@ -29,19 +40,19 @@ contract HelperConfig is Script, CodeConstants {
             return networkConfig[chainId];
         }
         // for local chain
-        else if (networkConfig[chainId] == LOCAL_CHAIN_ID) {
-            // return getOrCreateAnvilEthConfig();
+        else if (chainId == LOCAL_CHAIN_ID) {
+            return getOrCreateAnvilEthConfig();
         }
         // for sepolia config
         else {
-            // return getSepoliaEthConfig();
+            revert HelperConfig__InvalidChainId();
         }
     }
 
     /**
      * @dev : local network
      */
-    function getOrCreateAnvilEthConfig() public pure returns (NetworkConfig memory) {
+    function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
         // if a local chain already exists
         if (localNetworkConfig.vrfCoordinator != address(0)) {
             return localNetworkConfig;
@@ -78,4 +89,6 @@ contract HelperConfig is Script, CodeConstants {
             subscriptionId: 0 // for temporary
         });
     }
+
+    error HelperConfig__InvalidChainId();
 }
