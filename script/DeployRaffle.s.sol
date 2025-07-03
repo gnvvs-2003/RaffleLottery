@@ -7,7 +7,7 @@ import {Raffle} from "../src/Raffle.sol";
 contract DeployRaffle is Script {
     function run() public {}
 
-    function deployContract() public returns (Raffle /*,HelperConfig*/) {
+    function deployContract() public returns (Raffle /*,HelperConfig*/ ) {
         vm.startBroadcast();
         /*
         Raffle raffle = new Raffle(
