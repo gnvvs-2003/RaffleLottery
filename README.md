@@ -4,6 +4,7 @@
     3. imports 
     4. contract
 
+
 ### Build
 
 ```shell
@@ -53,3 +54,6 @@ $ forge --help
 $ anvil --help
 $ cast --help
 ```
+
+Testing setup 
+    1. for unit testing : RaffleTest.t.sol
