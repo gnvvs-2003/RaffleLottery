@@ -32,7 +32,6 @@ contract RaffleTest is Test, CodeConstants {
         /**
          * @dev : For testing Raffle we need to deploy the Raffle
          */
-
         DeployRaffle deployRaffle = new DeployRaffle();
         (raffle, helperConfig) = deployRaffle.deployContract();
         // adding some funds to `PLAYER`
@@ -93,9 +92,7 @@ contract RaffleTest is Test, CodeConstants {
      * @dev : For time based events or functions tensting
      */
     // Test-5 : Test for players to not enter raffle while raffle state is calculating
-    function test__DontAllowPlayersToEnterRaffleWhileRaffleStateIsCalculating()
-        public
-    {
+    function test__DontAllowPlayersToEnterRaffleWhileRaffleStateIsCalculating() public {
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
         vm.warp(block.timestamp + interval + 1);

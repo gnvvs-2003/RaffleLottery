@@ -16,13 +16,13 @@ contract HelperConfig is Script, CodeConstants {
     }
 
     NetworkConfig public localNetworkConfig;
-
-    constructor() {
-        networkConfig[LOCAL_CHAIN_ID] = getSepoliaEthConfig();
-    }
-
+    
     // network configs for chains mapping chainId to network Config
     mapping(uint256 chainId => NetworkConfig) public networkConfig;
+
+    constructor() {
+        networkConfig[ETH_SEPOLIA_CHAIN_ID] = getSepoliaEthConfig();
+    }
 
     /**
      * @dev : getting config by chainId
@@ -61,6 +61,7 @@ contract HelperConfig is Script, CodeConstants {
         vm.startBroadcast();
         VRFCoordinatorV2_5Mock vrfCoordinator =
             new VRFCoordinatorV2_5Mock(MOCK_BASE_FEE, MOCK_GAS_PRICE_LINK, MOCK_WEI_PER_UNIT_LINK);
+        uint256 subscriptionId = vrfCoordinator.createSubscription();
         vm.stopBroadcast();
         /**
          * @dev : creating a new local network
@@ -69,9 +70,9 @@ contract HelperConfig is Script, CodeConstants {
             entranceFee: 0.01 ether,
             interval: 30,
             vrfCoordinator: address(vrfCoordinator),
-            gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
+            gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             callbackGasLimit: 500000,
-            subscriptionId: 0
+            subscriptionId: subscriptionId
         });
 
         return localNetworkConfig;
