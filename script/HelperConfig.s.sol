@@ -37,9 +37,7 @@ contract HelperConfig is Script, CodeConstants {
     /**
      * @dev : local chain config
      */
-    function getConfigByChainId(
-        uint256 chainId
-    ) public returns (NetworkConfig memory) {
+    function getConfigByChainId(uint256 chainId) public returns (NetworkConfig memory) {
         // if network config has chain id configs
         if (networkConfig[chainId].vrfCoordinator != address(0)) {
             return networkConfig[chainId];
@@ -64,11 +62,8 @@ contract HelperConfig is Script, CodeConstants {
         }
         // if no local network was found use mocking
         vm.startBroadcast();
-        VRFCoordinatorV2_5Mock vrfCoordinator = new VRFCoordinatorV2_5Mock(
-            MOCK_BASE_FEE,
-            MOCK_GAS_PRICE_LINK,
-            MOCK_WEI_PER_UNIT_LINK
-        );
+        VRFCoordinatorV2_5Mock vrfCoordinator =
+            new VRFCoordinatorV2_5Mock(MOCK_BASE_FEE, MOCK_GAS_PRICE_LINK, MOCK_WEI_PER_UNIT_LINK);
         LinkToken link = new LinkToken();
         uint256 subscriptionId = vrfCoordinator.createSubscription();
         vm.stopBroadcast();
@@ -93,16 +88,15 @@ contract HelperConfig is Script, CodeConstants {
      * }
      */
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
-        return
-            NetworkConfig({
-                entranceFee: 0.01 ether,
-                interval: 30, // 30 seconds
-                vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
-                gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
-                callbackGasLimit: 500000,
-                subscriptionId: 0, // for temporary
-                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
-            });
+        return NetworkConfig({
+            entranceFee: 0.01 ether,
+            interval: 30, // 30 seconds
+            vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
+            gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
+            callbackGasLimit: 500000,
+            subscriptionId: 0, // for temporary
+            link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
+        });
     }
 
     error HelperConfig__InvalidChainId();
