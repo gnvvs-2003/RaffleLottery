@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import {Vm} from "forge-std/Vm.sol";
 import {Test} from "forge-std/Test.sol";
+import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts@1.4.0/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 import {Raffle} from "../src/Raffle.sol";
 
@@ -93,7 +94,9 @@ contract RaffleTest is Test, CodeConstants {
      * @dev : For time based events or functions tensting
      */
     // Test-5 : Test for players to not enter raffle while raffle state is calculating
-    function test__DontAllowPlayersToEnterRaffleWhileRaffleStateIsCalculating() public {
+    function test__DontAllowPlayersToEnterRaffleWhileRaffleStateIsCalculating()
+        public
+    {
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
         vm.warp(block.timestamp + interval + 1);
@@ -108,7 +111,7 @@ contract RaffleTest is Test, CodeConstants {
     function test__CheckUpKeepReturnsFalseIfItHasNoBalance() public {
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
-        (bool upKeepNeeded,) = raffle.checkUpkeep("");
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
         assert(!upKeepNeeded);
     }
 
@@ -119,7 +122,7 @@ contract RaffleTest is Test, CodeConstants {
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
         raffle.performUpkeep("");
-        (bool upKeepNeeded,) = raffle.checkUpkeep("");
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
         assert(!upKeepNeeded);
     }
 
@@ -146,7 +149,12 @@ contract RaffleTest is Test, CodeConstants {
         // act+assert
         vm.expectRevert(
             // for reverts with parameters
-            abi.encodeWithSelector(Raffle.Raffle__UpKeepNotNeeded.selector, currentBalance, numPlayers, raffleState)
+            abi.encodeWithSelector(
+                Raffle.Raffle__UpKeepNotNeeded.selector,
+                currentBalance,
+                numPlayers,
+                raffleState
+            )
         );
         raffle.performUpkeep("");
     }
@@ -161,7 +169,10 @@ contract RaffleTest is Test, CodeConstants {
     }
 
     // Test-10:Perform up keep updates raffle state and emits requestId
-    function test__PerformUpKeepUpdateRaffleStateAndEmitRequestId() public raffleEntered {
+    function test__PerformUpKeepUpdateRaffleStateAndEmitRequestId()
+        public
+        raffleEntered
+    {
         vm.recordLogs();
         raffle.performUpkeep("");
         Vm.Log[] memory entry = vm.getRecordedLogs();
@@ -172,10 +183,22 @@ contract RaffleTest is Test, CodeConstants {
     }
 
     // MODIFIER : skipFork
-    modifier skipFort() {
+    modifier skipFork() {
         if (block.chainid != LOCAL_CHAIN_ID) {
             return;
         }
         _;
     }
+
+    // Test-11:Test for random words
+    function test__FulfillRandomWordsCanOnlyBeCalledAfterPerformUpKeep(
+        uint256 randomRequestId
+    ) public raffleEntered {
+        vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
+        VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(
+            randomRequestId,
+            address(raffle)
+        );
+    }
+    
 }
